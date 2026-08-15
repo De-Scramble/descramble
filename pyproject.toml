@@ -31,6 +31,15 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Information Analysis",
 ]
 
+# These are the libraries the pipeline imports, declared so the package is
+# well-formed and introspectable.
+#
+# They are NOT the recommended way to install De-Scramble. Resolving them pulls
+# splink's own hard dependency on igraph, which is GPL-licensed and which this
+# project never uses. The recommended install is the pinned, igraph-free
+# manifest in requirements.txt installed with --no-deps; see README "Installing"
+# and note 2 in NOTICE. pip has no mechanism to exclude a transitive package, so
+# the exclusion cannot be expressed here.
 dependencies = [
     "splink>=4.0,<5",
     "duckdb>=1.0",
