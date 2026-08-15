@@ -1,0 +1,75 @@
+name: Bug report
+description: Something behaves incorrectly or crashes
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        **Do not report security vulnerabilities here.** Follow `SECURITY.md` and send them
+        privately to security@descramble.dev instead.
+
+        **Do not paste real personal data.** If the problem involves your own records, reduce it to
+        a handful of invented rows that still reproduce it.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you observe?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands, and the smallest input that still shows the problem.
+      placeholder: |
+        1. python -m descramble generate --rows 500
+        2. python -m descramble run
+        3. observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output or traceback
+      description: Paste the full traceback. This is rendered as code, no backticks needed.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: De-Scramble version or commit
+      placeholder: "0.1.0, or the commit SHA you are on"
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "output of: python --version"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "e.g. Ubuntu 24.04, macOS 15, Windows 11"
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This report contains no real personal data and no credentials.
+          required: true

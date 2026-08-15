@@ -1,0 +1,42 @@
+name: Question
+description: Ask how something works or how to configure it
+title: "question: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Questions are welcome. If your question is open-ended or conversational, the Discussions
+        tab is often a better home for it — but if you are not sure, ask here and we will move it.
+
+        Two things worth checking first: the README covers installation, configuration, and how the
+        matching works; `SUPPORT.md` explains what free community help does and does not promise.
+
+        **Please do not paste real personal data or credentials** into this form.
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: What you have tried, or what you are trying to achieve
+      description: |
+        Knowing the goal behind the question usually gets you a much more useful answer than the
+        question alone.
+  - type: input
+    id: version
+    attributes:
+      label: De-Scramble version or commit
+      placeholder: "0.1.0, or the commit SHA you are on"
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: This question contains no real personal data and no credentials.
+          required: true
+        - label: I understand this is not the channel for security vulnerabilities (see SECURITY.md).
+          required: true

@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest a capability or an improvement
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the **problem** first and the solution second. The problem is the part we
+        most need to understand, and it often has more than one good answer.
+
+        For anything large, opening this issue before writing code is exactly right — it means we
+        can agree on the approach before you spend your time.
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that is currently hard, slow, or impossible?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like to happen
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you have considered
+      description: Including workarounds you are using today.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the pipeline does this concern?
+      options:
+        - Input readers (CSV / Parquet / other sources)
+        - Record linkage and matching quality
+        - Blocking rules and scale
+        - Golden records and survivorship
+        - Iceberg lakehouse output and catalogues
+        - Command-line interface
+        - Documentation
+        - Other or not sure
+    validations:
+      required: true
+  - type: checkboxes
+    id: participation
+    attributes:
+      label: Would you like to work on this?
+      options:
+        - label: I would be willing to open a pull request for this.

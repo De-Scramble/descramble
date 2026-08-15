@@ -1,0 +1,6 @@
+# Blank issues are disabled so that reports arrive with enough context to act on.
+# Use one of the templates, or open a Discussion for open-ended questions.
+#
+# Note: security vulnerabilities must NOT be reported through the issue tracker.
+# See SECURITY.md — report them privately to security@descramble.dev.
+blank_issues_enabled: false
