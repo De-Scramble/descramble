@@ -1,0 +1,52 @@
+name: Dependency licences
+
+# Licence compatibility is a standing property, not a one-time audit. A
+# dependency bump can introduce a copyleft or unlicensed transitive package
+# without anyone noticing, which would quietly impose obligations this project
+# does not declare. So the check re-runs whenever dependencies could have
+# changed, and on a schedule to catch drift that arrives through a resolver
+# rather than through a commit.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "pyproject.toml"
+      - "requirements.txt"
+      - "scripts/check_licenses.py"
+      - ".github/workflows/license-scan.yml"
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "requirements.txt"
+      - "scripts/check_licenses.py"
+      - ".github/workflows/license-scan.yml"
+  schedule:
+    # Weekly, so a transitive change that arrives without a commit here is
+    # still caught within a few days.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  licences:
+    name: verify Apache-2.0 compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install runtime dependencies only
+        # Runtime only, deliberately: development and build tooling is not
+        # redistributed, and including it here would produce findings that do
+        # not matter while burying the ones that do.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+      - name: Check every runtime dependency licence
+        run: python scripts/check_licenses.py
