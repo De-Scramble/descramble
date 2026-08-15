@@ -62,9 +62,14 @@ INCOMPATIBLE_MARKERS = (
     "CC-BY-NC", "NonCommercial", "Proprietary", "Commons Clause",
 )
 
-#: Packaging and tooling present in any environment; not shipped as part of the
-#: runtime and therefore out of scope for this gate.
-NOT_SHIPPED = {"pip", "setuptools", "wheel", "descramble", "pkg-resources"}
+#: Packaging and development tooling. Never redistributed as part of the
+#: runtime, so out of scope for this gate — and listing them would bury the
+#: findings that matter under ones that do not. Excluded by name rather than by
+#: hoping the environment happens to be clean.
+NOT_SHIPPED = {
+    "pip", "setuptools", "wheel", "descramble", "pkg-resources",
+    "pytest", "pluggy", "iniconfig",
+}
 
 CLASSIFIER_TO_SPDX = {
     "Apache Software License": "Apache-2.0",

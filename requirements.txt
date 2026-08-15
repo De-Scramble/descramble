@@ -1,49 +1,72 @@
-Jinja2==3.1.6
-MarkupSafe==3.0.3
-Pygments==2.20.0
-SQLAlchemy==2.0.52
-altair==6.2.2
-annotated-types==0.8.0
-attrs==26.1.0
-cachetools==6.2.6
-certifi==2026.7.22
-charset-normalizer==3.5.0
-click==8.4.2
-colorama==0.4.6
-descramble @ file:///D:/descramble-build/descramble
-duckdb==1.5.5
-fsspec==2026.7.0
-greenlet==3.5.5
-idna==3.18
-igraph==1.0.0
-jsonschema-specifications==2025.9.1
-jsonschema==4.26.0
-markdown-it-py==4.2.0
-mdurl==0.1.2
-mmh3==5.2.1
-narwhals==2.24.0
-numpy==2.4.6
-packaging==26.3
-pandas==3.0.5
-pyarrow==25.0.1
-pydantic==2.13.4
-pydantic_core==2.46.4
-pyiceberg==0.11.1
-pyparsing==3.3.2
-pyroaring==1.1.0
-python-dateutil==2.9.0.post0
-referencing==0.37.0
-requests==2.34.2
-rich==14.3.4
-rpds-py==2026.6.3
-six==1.17.0
-splink==4.0.16
-sqlglot==30.17.0
-strictyaml==1.7.3
-tenacity==9.1.4
-texttable==1.7.0
-typing-inspection==0.4.4
-typing_extensions==4.16.0
-tzdata==2026.3
-urllib3==2.7.0
-zstandard==0.25.0
+# De-Scramble pinned runtime manifest
+#
+# THIS FILE IS DELIBERATELY igraph-FREE. Install it with --no-deps:
+#
+#     pip install --no-deps -r requirements.txt
+#     pip install --no-deps .
+#
+# Why --no-deps is mandatory, and not a stylistic choice:
+#   splink declares igraph as a hard dependency. igraph is GPL-licensed. If pip
+#   is allowed to resolve dependencies it will install igraph even though this
+#   file omits it, because pip has no mechanism to exclude a package (a
+#   constraints file pins versions, it cannot subtract). --no-deps tells pip to
+#   install exactly what is listed here and nothing else.
+#
+#   De-Scramble never imports igraph. Splink does not import it at import time,
+#   and clustering runs through the DuckDB connected-components path, which is
+#   verified by running the full pipeline and test suite in an igraph-free
+#   environment in CI.
+#
+# Because --no-deps disables resolution, this list must be COMPLETE. It is
+# generated from the real installed closure rooted at the libraries the
+# pipeline imports, with the igraph edge cut; texttable is absent because
+# igraph was its only parent.
+#
+# Each entry records what pulls it in.
+
+altair==6.2.2                      # <- splink
+annotated-types==0.8.0             # <- pydantic
+attrs==26.1.0                      # <- jsonschema, referencing
+cachetools==6.2.6                  # <- pyiceberg
+certifi==2026.7.22                 # <- requests
+charset-normalizer==3.5.0          # <- requests
+click==8.4.2                       # <- pyiceberg
+colorama==0.4.6                    # <- click
+duckdb==1.5.5                      # <- splink
+fsspec==2026.7.0                   # <- pyiceberg
+greenlet==3.5.5                    # <- sqlalchemy
+idna==3.18                         # <- requests
+Jinja2==3.1.6                      # <- altair, splink
+jsonschema==4.26.0                 # <- altair
+jsonschema-specifications==2025.9.1 # <- jsonschema
+markdown-it-py==4.2.0              # <- rich
+MarkupSafe==3.0.3                  # <- jinja2
+mdurl==0.1.2                       # <- markdown-it-py
+mmh3==5.2.1                        # <- pyiceberg
+narwhals==2.24.0                   # <- altair
+numpy==2.4.6                       # <- pandas, splink
+packaging==26.3                    # <- altair
+pandas==3.0.5                      # <- splink
+pyarrow==25.0.1                    # <- imported directly by De-Scramble
+pydantic==2.13.4                   # <- pyiceberg
+pydantic_core==2.46.4              # <- pydantic
+Pygments==2.20.0                   # <- rich
+pyiceberg==0.11.1                  # <- imported directly by De-Scramble
+pyparsing==3.3.2                   # <- pyiceberg
+pyroaring==1.1.0                   # <- pyiceberg
+python-dateutil==2.9.0.post0       # <- pandas, strictyaml
+referencing==0.37.0                # <- jsonschema, jsonschema-specifications
+requests==2.34.2                   # <- pyiceberg
+rich==14.3.4                       # <- pyiceberg
+rpds-py==2026.6.3                  # <- jsonschema, referencing
+six==1.17.0                        # <- python-dateutil
+splink==4.0.16                     # <- imported directly by De-Scramble
+SQLAlchemy==2.0.52                 # <- pyiceberg
+sqlglot==30.17.0                   # <- splink
+strictyaml==1.7.3                  # <- pyiceberg
+tenacity==9.1.4                    # <- pyiceberg
+typing_extensions==4.16.0          # <- altair, pydantic, pydantic-core, referencing, sqlalchemy, typing-inspection
+typing-inspection==0.4.4           # <- pydantic
+tzdata==2026.3                     # <- pandas
+urllib3==2.7.0                     # <- requests
+zstandard==0.25.0                  # <- pyiceberg

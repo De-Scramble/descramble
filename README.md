@@ -38,14 +38,19 @@ The answer is to score the *evidence*, and to only score pairs worth scoring.
 ## Quickstart
 
 ```bash
-git clone https://github.com/OWNER/descramble.git
+git clone https://github.com/De-Scramble/descramble.git
 cd descramble
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -e .
+
+pip install --no-deps -r requirements.txt
+pip install --no-deps .
 
 python -m descramble demo
 ```
+
+`--no-deps` is required rather than optional. It is what keeps GPL-licensed
+software off your machine — see [Installing](#installing) for why.
 
 `demo` generates a synthetic dataset with deliberate duplicates, resolves it, writes the golden
 records to a local Iceberg table, and reports what it did:
@@ -65,6 +70,39 @@ To run it against your own CSV or Parquet file — any file with the columns `re
 
 ```bash
 python -m descramble run --input path/to/your/records.csv
+```
+
+## Installing
+
+```bash
+pip install --no-deps -r requirements.txt
+pip install --no-deps .
+```
+
+**Why `--no-deps`.** Splink, the linkage engine underneath De-Scramble, declares a hard dependency on
+`igraph`, which is **GPL-licensed**. De-Scramble never uses igraph — it contains no igraph code,
+Splink does not import it at import time, and clustering runs through the DuckDB
+connected-components path. The full test suite and the end-to-end pipeline are verified to run with
+igraph absent, producing identical results.
+
+So `requirements.txt` is a complete, pinned manifest that omits igraph. `--no-deps` tells pip to
+install exactly what is listed and resolve nothing further. It is necessary because pip has no way to
+*exclude* a package: a constraints file pins versions, it cannot subtract one. A CI job rebuilds this
+environment on every push, asserts igraph is neither installed nor importable, and runs the whole
+suite against it.
+
+Because `--no-deps` disables resolution, the manifest must stay complete — which is exactly what that
+CI job is guarding.
+
+**The honest caveat.** A plain `pip install descramble` or `pip install .`, with resolution enabled,
+*will* install igraph. If you install that way, or if you add `splink` to your own project's
+dependencies, you receive GPL-licensed code. This is stated plainly in [NOTICE](NOTICE), which
+records what was measured and nothing more.
+
+For development, add the test tooling the same way:
+
+```bash
+pip install --no-deps pytest==9.1.1 iniconfig==2.3.0 pluggy==1.6.0
 ```
 
 ## Architecture
@@ -223,7 +261,9 @@ least stable. Where records carry trustworthy timestamps, recency would beat it.
 ## Testing
 
 ```bash
-pip install -e ".[dev]"
+pip install --no-deps -r requirements.txt
+pip install --no-deps .
+pip install --no-deps pytest==9.1.1 iniconfig==2.3.0 pluggy==1.6.0
 pytest
 ```
 
@@ -247,10 +287,12 @@ Contributions are welcome. We use the [Developer Certificate of Origin](https://
 Apache License 2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 The core is free forever and is never gated, crippled, or limited to sell an upgrade; see the
-open-core promise in [GOVERNANCE.md](GOVERNANCE.md). **Note:** `NOTICE` records an unresolved
-licensing caveat — `igraph`, a transitive dependency of Splink, is GPL-licensed and is installed
-alongside this project even though De-Scramble never uses it. Please read it before redistributing a
-built environment.
+open-core promise in [GOVERNANCE.md](GOVERNANCE.md).
+
+Every dependency installed by the documented path is permissively licensed and compatible with
+Apache-2.0; [NOTICE](NOTICE) lists all 46 with their licences, and records the one file-level
+copyleft dependency (certifi, MPL-2.0) explicitly. It also records the igraph caveat described under
+[Installing](#installing). Please read it before redistributing a built environment.
 
 ---
 

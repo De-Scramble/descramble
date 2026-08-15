@@ -22,8 +22,9 @@ THIRD-PARTY DEPENDENCIES
 -------------------------------------------------------------------------------
 
 The licences below were read from the metadata of the packages actually
-installed by `pip install .`, not from a hand-maintained list, and are
-re-verified on every dependency change by `scripts/check_licenses.py` in CI.
+installed by the documented install path (see README, "Installing"), not from a
+hand-maintained list, and are re-verified on every dependency change by
+`scripts/check_licenses.py` in CI.
 
 Direct runtime dependencies:
 
@@ -33,7 +34,7 @@ Direct runtime dependencies:
   pyarrow                              Apache-2.0
   pandas                               BSD-3-Clause
 
-Full runtime closure, including transitive dependencies:
+Full runtime closure produced by the documented install path (46 packages):
 
   altair 6.2.2                         BSD-3-Clause
   annotated-types 0.8.0                MIT
@@ -47,7 +48,6 @@ Full runtime closure, including transitive dependencies:
   fsspec 2026.7.0                      BSD-3-Clause
   greenlet 3.5.5                       MIT AND PSF-2.0
   idna 3.18                            BSD-3-Clause
-  igraph 1.0.0                         GNU General Public License (see note 2)
   Jinja2 3.1.6                         BSD-3-Clause
   jsonschema 4.26.0                    MIT
   jsonschema-specifications 2025.9.1   MIT
@@ -77,12 +77,14 @@ Full runtime closure, including transitive dependencies:
   sqlglot 30.17.0                      MIT
   strictyaml 1.7.3                     MIT
   tenacity 9.1.4                       Apache-2.0
-  texttable 1.7.0                      MIT
   typing-inspection 0.4.4              MIT
   typing_extensions 4.16.0             PSF-2.0
   tzdata 2026.3                        Apache-2.0
   urllib3 2.7.0                        MIT
   zstandard 0.25.0                     BSD-3-Clause
+
+Every entry above is permissive and compatible with Apache-2.0 redistribution,
+with the single documented exception in note 1.
 
 
 Note 1 — certifi (MPL-2.0)
@@ -94,24 +96,41 @@ certifi, so its own Apache-2.0 licensing is unaffected. Recorded here so the
 decision is visible rather than implicit.
 
 
-Note 2 — igraph (GPL) — UNRESOLVED
-----------------------------------
-igraph is published under the GNU General Public License and is a hard,
-non-optional dependency of splink, which is the record-linkage engine this
-project is built on. It is therefore installed on every machine that runs
-`pip install descramble`, even though De-Scramble does not use it:
+Note 2 — igraph (GPL): excluded by the documented install path
+--------------------------------------------------------------
+`splink`, the record-linkage engine this project is built on, declares a hard,
+non-optional dependency on `igraph`, which is GPL-licensed. De-Scramble does not
+use igraph:
 
   - De-Scramble contains no igraph code and imports it nowhere.
-  - splink does not import igraph when it is imported; the dependency is
-    exercised only by graph-metrics features this project does not call.
-  - The pipeline was verified to run correctly, producing identical clustering,
-    with igraph uninstalled.
+  - splink does not import igraph at import time; clustering runs through the
+    DuckDB connected-components path.
+  - The full test suite and the end-to-end pipeline were verified to run in an
+    environment with igraph absent, producing results identical to a run with it
+    present.
 
-De-Scramble's own source remains Apache-2.0 and is unaffected. What is affected
-is the environment a user ends up with: installing this project also installs
-GPL-licensed software they may not have expected. Anyone redistributing a built
-environment containing igraph must comply with the GPL for that component.
+The documented install path therefore omits it. `requirements.txt` is a complete
+pinned manifest that excludes igraph (and texttable, whose only parent was
+igraph), installed with `--no-deps` so that pip installs exactly what is listed
+and resolves nothing further. A CI job builds that environment on every push,
+asserts igraph is neither installed nor importable, and runs the whole suite
+against it, so the exclusion is enforced rather than merely intended.
 
-This is stated plainly because a licensing surprise discovered later is far
-worse than one disclosed up front. It is tracked as an open issue and is not
-considered settled.
+WHAT THIS DOES AND DOES NOT CLAIM
+---------------------------------
+It claims exactly this: a user who follows the documented install path receives
+no GPL-licensed software from this project's dependency tree. That was verified
+by measurement in a clean environment, not by reasoning.
+
+It does not claim that igraph can never reach your machine. Specifically:
+
+  - A naive `pip install descramble`, or `pip install .`, or `pip install splink`
+    WITH dependency resolution enabled will still install igraph, because pip
+    has no mechanism to exclude a package — a constraints file pins versions, it
+    cannot subtract one. Anyone installing that way receives GPL code.
+  - If you add splink to your own project's dependencies alongside De-Scramble,
+    your resolver will pull igraph regardless of what this project does.
+
+If you redistribute a built environment, check which of the two paths produced
+it. This note records what was measured and no more; it is not legal advice, and
+the licensing judgement is the operator's to confirm.

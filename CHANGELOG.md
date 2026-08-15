@@ -26,4 +26,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Continuous integration running the test suite on every push and pull request, plus a standing
   dependency-licence scan that re-verifies licence compatibility whenever dependencies change.
 
-[Unreleased]: https://github.com/OWNER/descramble/commits/main
+- A pinned, igraph-free dependency manifest installed with `--no-deps`, so the documented install
+  path pulls no GPL-licensed software, enforced by a CI job that asserts igraph is absent and runs
+  the full suite against that environment.
+
+[Unreleased]: https://github.com/De-Scramble/descramble/commits/main

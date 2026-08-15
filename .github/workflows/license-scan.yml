@@ -40,13 +40,50 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install runtime dependencies only
+      - name: Install via the documented install path
         # Runtime only, deliberately: development and build tooling is not
         # redistributed, and including it here would produce findings that do
         # not matter while burying the ones that do.
+        #
+        # This installs the way the README tells users to install, because a
+        # licence gate that checks a different environment from the one people
+        # actually get is measuring the wrong thing.
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-deps -r requirements.txt
+          python -m pip install --no-deps .
+
+      - name: Check every runtime dependency licence
+        run: python scripts/check_licenses.py
+
+  naive-path-caveat:
+    name: record what a plain "pip install ." pulls in
+    runs-on: ubuntu-latest
+    # Informational, and deliberately allowed to fail without blocking: it
+    # documents the gap between the documented install and the naive one, so
+    # the caveat in NOTICE is kept honest by measurement rather than by memory.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install the naive way (dependency resolution enabled)
         run: |
           python -m pip install --upgrade pip
           python -m pip install .
 
-      - name: Check every runtime dependency licence
+      - name: Report whether GPL code arrived
+        run: |
+          if python -m pip show igraph > /dev/null 2>&1; then
+            echo "As documented in NOTICE: a plain 'pip install .' resolves splink's"
+            echo "dependencies and installs igraph (GPL). Use the documented path instead."
+            python -m pip show igraph | head -3
+          else
+            echo "igraph was NOT pulled in by the naive install; the NOTICE caveat may be stale."
+          fi
+
+      - name: Licence report for the naive path
         run: python scripts/check_licenses.py
