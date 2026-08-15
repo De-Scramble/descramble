@@ -1,0 +1,15 @@
+# Normalise line endings in the repository to LF regardless of the platform a
+# contributor works on. Without this, a checkout on Windows can commit CRLF back
+# and produce diffs where nothing actually changed — and the sample CSV is read
+# by tests on three operating systems, so its bytes need to be the same
+# everywhere.
+* text=auto eol=lf
+
+# Files whose bytes must never be rewritten.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.parquet binary
