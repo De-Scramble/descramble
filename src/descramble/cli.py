@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 from descramble import __version__
@@ -100,6 +101,70 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+class ExpectedTrainingNoise(logging.Filter):
+    """Hides the training warnings that are *expected* on the bundled demo data.
+
+    The demo dataset is deliberately small, so some comparison levels occur too
+    rarely for the model to estimate every parameter from them, and Splink says
+    so — correctly — for each one. The result is a wall of warnings in front of
+    a run that worked perfectly, which reads to a newcomer as a broken tool.
+
+    This is presentation only, and it is deliberately narrow in three ways:
+    it matches a fixed list of known-expected phrases, so any other warning
+    still reaches the user untouched; it only ever applies to records from
+    Splink's own loggers; and it is installed exclusively around the ``demo``
+    command, so real runs are unaffected. What is hidden is counted and
+    reported rather than silently dropped.
+    """
+
+    #: Substrings of the warnings that are expected on a small demo dataset.
+    #: Matching on the message text keeps this specific: a genuine problem
+    #: would not phrase itself this way.
+    EXPECTED_PHRASES = (
+        "not observed in dataset",
+        "values not fully trained",
+        "unable to train",
+        "there are some parameter estimates which have neither been estimated",
+    )
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.suppressed = 0
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.name.partition(".")[0] != "splink":
+            return True
+        message = record.getMessage()
+        if any(phrase in message for phrase in self.EXPECTED_PHRASES):
+            self.suppressed += 1
+            return False
+        return True
+
+
+@contextmanager
+def _quieten_expected_demo_warnings(active: bool):
+    """Install the filter on the root handlers for the duration of a demo run.
+
+    The filter goes on the handlers rather than on a logger: Python applies a
+    logger's own filters only to records created by that logger, so a filter on
+    ``splink`` would never see records propagating up from
+    ``splink.internals.*``. Handlers see everything that reaches them.
+    """
+    if not active:
+        yield None
+        return
+
+    noise = ExpectedTrainingNoise()
+    handlers = list(logging.getLogger().handlers)
+    for handler in handlers:
+        handler.addFilter(noise)
+    try:
+        yield noise
+    finally:
+        for handler in handlers:
+            handler.removeFilter(noise)
+
+
 def _configure_logging(verbose: bool) -> None:
     logging.basicConfig(
         level=logging.INFO if verbose else logging.WARNING,
@@ -136,7 +201,11 @@ def _do_generate(args: argparse.Namespace) -> int:
     return 0
 
 
-def _do_run(args: argparse.Namespace, config: PipelineConfig) -> int:
+def _do_run(
+    args: argparse.Namespace,
+    config: PipelineConfig,
+    noise: ExpectedTrainingNoise | None = None,
+) -> int:
     result = run_pipeline(
         config,
         write=not getattr(args, "no_write", False),
@@ -145,7 +214,18 @@ def _do_run(args: argparse.Namespace, config: PipelineConfig) -> int:
     if result.input_records == 0:
         _report("Nothing to do", ["no records newer than the stored watermark"])
         return 0
-    _report("Resolution complete", result.summary_lines())
+
+    lines = result.summary_lines()
+    if noise is not None and noise.suppressed:
+        lines.append("")
+        lines.append(
+            f"Note: {noise.suppressed} expected model-training warnings were hidden. On a "
+            "dataset this small, some comparison levels are too rare to estimate every "
+            "parameter from, so those fall back to sensible defaults. That is expected "
+            "here and does not affect the results above; on a real dataset they train "
+            "fully. Re-run with --verbose to see them."
+        )
+    _report("Resolution complete", lines)
     return 0
 
 
@@ -178,7 +258,11 @@ def main(argv: list[str] | None = None) -> int:
                 )
             else:
                 print(f"Using existing input at {config.input_path}")
-            return _do_run(args, config)
+            # Quietened for the demo only, and only when not asking for detail.
+            # `run` is deliberately untouched: on real data these warnings are
+            # information the user needs.
+            with _quieten_expected_demo_warnings(active=not args.verbose) as noise:
+                return _do_run(args, config, noise=noise)
 
         return _do_run(args, config)
 
