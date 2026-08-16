@@ -41,13 +41,46 @@ The answer is to score the *evidence*, and to only score pairs worth scoring.
 git clone https://github.com/De-Scramble/descramble.git
 cd descramble
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+```
 
+Activate the environment with the command for **your** shell:
+
+```bash
+# macOS / Linux (bash, zsh)
+source .venv/bin/activate
+```
+
+```powershell
+# Windows (PowerShell)
+.venv\Scripts\Activate.ps1
+```
+
+```bat
+:: Windows (cmd.exe)
+.venv\Scripts\activate.bat
+```
+
+```bash
+# Windows (Git Bash) - note Scripts, not bin
+source .venv/Scripts/activate
+```
+
+Then install and run:
+
+```bash
 pip install --no-deps -r requirements.txt
 pip install --no-deps .
 
 python -m descramble demo
 ```
+
+> If `python` is not found on macOS or Linux, use `python3` (and `pip3`) instead. On Windows, `py`
+> works if `python` does not.
+>
+> **PowerShell:** if activation is refused with *"running scripts is disabled on this system"*, that
+> is Windows' default execution policy, not a problem with this project. Either allow scripts for the
+> current session only — `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` — or use
+> `cmd.exe` and `.venv\Scripts\activate.bat` instead.
 
 `--no-deps` is required rather than optional. It is what keeps GPL-licensed
 software off your machine — see [Installing](#installing) for why.

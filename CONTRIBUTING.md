@@ -43,12 +43,27 @@ We ask for no copyright assignment and no CLA. There is no paperwork beyond the 
 git clone https://github.com/De-Scramble/descramble.git
 cd descramble
 python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+```
 
+Activate the environment with the command for your shell — `source` is not a PowerShell command, so
+copying the wrong line is the most common first stumble:
+
+| Shell | Command |
+|---|---|
+| macOS / Linux (bash, zsh) | `source .venv/bin/activate` |
+| Windows (PowerShell) | `.venv\Scripts\Activate.ps1` |
+| Windows (cmd.exe) | `.venv\Scripts\activate.bat` |
+| Windows (Git Bash) | `source .venv/Scripts/activate` |
+
+Then install:
+
+```bash
 pip install --no-deps -r requirements.txt
 pip install --no-deps -e .
 pip install --no-deps pytest==9.1.1 iniconfig==2.3.0 pluggy==1.6.0
 ```
+
+If `python` is not found on macOS or Linux, use `python3`; on Windows, `py` works if `python` does not.
 
 `--no-deps` is deliberate and load-bearing: it is what keeps the GPL-licensed `igraph` out of the
 environment. Please do not "fix" it to a plain `pip install -e ".[dev]"` — that reintroduces igraph.
